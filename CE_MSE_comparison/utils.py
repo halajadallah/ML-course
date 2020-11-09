@@ -87,13 +87,13 @@ def get_profile(costFunc,X_train_o, y_train, th1, th2, ths1, ths2, axis):
     
     
 # preparing plots of profiles
-def plot_profiles(th1_1, th2_2, ths1, ths2, J_t1, J_tt1, J_t2, J_tt2, loss_type = 'CE'):
+def plot_profiles(th1_1, th2_2, ths1, ths2, J_t1, J_tt1, J_t2, J_tt2, th2_1, th1_2,loss_type = 'CE'):
     plt.subplots(1,2,figsize =(12,4))
 
     plt.subplot(121)
     plt.plot(th1_1, J_t1)
     plt.plot(ths1, J_tt1, 'r*')
-    plt.title('profile along theta_0')
+    plt.title('profile along theta_0 where theta_1 is fixed at '+str(round(th2_1,5)))
     plt.xlabel('theta_0')
     plt.ylabel('Loss')
 
@@ -101,7 +101,7 @@ def plot_profiles(th1_1, th2_2, ths1, ths2, J_t1, J_tt1, J_t2, J_tt2, loss_type 
     plt.subplot(122)
     plt.plot(th2_2, J_t2)
     plt.plot(ths2, J_tt2,'*r')
-    plt.title('profile along theta_1')
+    plt.title('profile along theta_1 where theta_0 is fixed at '+str(round(th1_2,5)))
     plt.xlabel('theta_1')
     plt.ylabel('Loss')
 
