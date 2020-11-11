@@ -13,6 +13,113 @@ def sigmoid(z):
 
 def sigmoid_grad(z):
     return sigmoid(z)*(1-sigmoid(z))
+def costFunction(theta, X, y):
+    '''
+    We define here the cross entropy loss function
+    takes X, y and theta as parameters. the values 
+    of theta define the model it self.
+    Their dimensions are as follows:
+    X : (m,2), y: (m,1), theta: (1,2)
+    
+    returns the loss and the gradient of the loss
+    '''
+    #constants
+    m = len(y)  
+    
+    #initialize loss J and its gradient
+    J = 0
+    grad = np.zeros(theta.shape)
+    
+    # cost function using vectorization
+    z = np.matmul(theta,X.T)
+    pred = sigmoid(z)
+    
+    # for visualization purposes we do not want the pred
+    # to take 1 or 0 values so that the log(pre) and 
+    # log(1-pred) do not taake -inf values. 
+    pred[pred > 0.999] = pred[pred>0.999] - 1e-10
+    pred[pred < 0.001] = pred[pred<0.001] + 1e-10
+    
+    # cross entropy loss
+    J = (-1/m)*((np.dot(y,np.log(pred)))+ np.dot(1-y,np.log(1-pred))) 
+    
+    # the gradient of the J with respect to theta
+    grad = (1/m) * np.matmul((pred-y).T,X)
+    
+    
+    return J, grad
+
+def costFunction_MSE(theta, X,y):
+    '''
+    We define here the mean squared error loss function.
+    it takes X, y and theta as parameters. the values 
+    of theta define the model it self.
+    Their dimensions are as follows:
+    X : (m,2), y: (m,1), theta: (1,2)
+    
+    returns the loss and the gradient of the loss
+    '''
+    #constants
+    m = len(y)
+    
+    #initialize J and its gradient
+    J = 0
+    grad = np.zeros(theta.shape)
+    
+    # cost function using vectorization
+    
+    z = np.matmul(theta,X.T)
+    pred = sigmoid(z)
+    
+    J = (1/(2*m))* np.dot(y-pred, y-pred)
+    
+    # gradient of J with respect to theta has extra
+    # step of computing h'
+    hp = sigmoid_grad(z)
+    grad = (-1/m) * np.matmul((hp*(y-pred)).T,X)
+    
+    return J, grad
+
+
+def gradientDescent(X, y, theta, alpha, num_iter):
+    '''
+    The algorithm takes X, y and theta as well as
+    alpha (the learning rate or step size) and the 
+    number of iterations
+    It returns the optimal theta that minimizes the loss
+    function as well as a record of loss values and thetas
+    per iteration. 
+    '''
+    m = len(y)
+    J_history = np.zeros(num_iter)
+    theta_hist = []
+    for itern in range(num_iter):
+        J,grad = costFunction(theta, X,y)
+        theta = theta - alpha*grad
+        J_history[itern] = J
+        theta_hist.append(theta)
+        
+    return theta, J_history, theta_hist
+
+def gradientDescent_MSE(X, y, theta, alpha, num_iter):
+    '''
+    The algorithm takes X, y and theta as well as
+    alpha (the learning rate or step size) and the 
+    number of iterations
+    It returns the optimal theta that minimizes the loss
+    function as well as a record of loss values and thetas
+    per iteration. 
+    '''
+    m = len(y)
+    J_history = np.zeros(num_iter)
+    theta_hist = []
+    for itern in range(num_iter):
+        J,grad = costFunction_MSE(theta, X,y)
+        theta = theta - alpha*grad
+        J_history[itern] = J
+        theta_hist.append(theta)
+        
+    return theta, J_history, theta_hist
 
 def results(X,y, theta):
     # compute sigmoid values/pred probabilities using given(optimal) theta
@@ -109,4 +216,76 @@ def plot_profiles(th1_1, th2_2, ths1, ths2, J_t1, J_tt1, J_t2, J_tt2, th2_1, th1
     plt.tight_layout()
     plt.show()
     
-  
+    
+def local_min_contour_plot(X_train_o, y_train, theta_0_lcm, iterations, xmin, xmax, ymin, ymax, gmin, loss_type):
+    '''
+    Minimizes MSE loss for given number of iterations using lr = 0.1 and 1.0 and prints results
+    plots path to computed minimum
+    plots contour ans surface over given window (xmin,xmax),(ymin,ymax)
+    loss_type either 'MSE' or 'CE'
+    '''
+    if loss_type == 'MSE':
+        theta_mse_lcm, J_hist_mse_lcm, theta_hist_mse_lcm = gradientDescent_MSE(X_train_o,y_train,theta_0_lcm, 0.1, iterations)
+        theta_mse_lr1_lcm, J_hist_mse_lr1_lcm, theta_hist_mse_lr1_lcm = gradientDescent_MSE(X_train_o,y_train,theta_0_lcm, 1, iterations)
+    elif loss_type == 'CE':
+        theta_mse_lcm, J_hist_mse_lcm, theta_hist_mse_lcm = gradientDescent(X_train_o,y_train,theta_0_lcm, 0.1, iterations)
+        theta_mse_lr1_lcm, J_hist_mse_lr1_lcm, theta_hist_mse_lr1_lcm = gradientDescent(X_train_o,y_train,theta_0_lcm, 1, iterations)
+        
+    print('theta_0_lcm ', theta_0_lcm)
+    print('first theta in record should be close to initial theta')
+    print('first theta for this run ', theta_hist_mse_lcm[0])
+
+    print('optimal theta lr = 0.1', theta_mse_lcm)
+    print('loss lr=0.1 ', J_hist_mse_lcm[-1])
+    print('optimal theta lr =1.0 ', theta_mse_lr1_lcm)
+    print('loss lr= 1.0 ', J_hist_mse_lr1_lcm[-1])
+
+    # Convergence path 
+    th_mse_lcm_short_list = [theta_hist_mse_lcm[i] for i in range(0,8000,1000)]
+    [th_mse_lcm_short_list.append(theta_hist_mse_lcm[i]) for i in range(8000,iterations,4000)]
+
+    ths11_lcm = []
+    ths22_lcm = []
+
+    for i in range(len(th_mse_lcm_short_list)):
+        ths11_lcm.append(th_mse_lcm_short_list[i][0])
+        ths22_lcm.append(th_mse_lcm_short_list[i][1])
+    plt.plot(ths11_lcm, ths22_lcm, '-*')
+    plt.title('Path of theta values: \n first 8 points every 1000 steps then every 4000 steps')
+
+    # Prepare data for contour and surface plots
+    tt1_lcm = np.sort(np.concatenate((np.linspace(xmin,xmax,401),np.array(ths11_lcm))))
+    tt2_lcm = np.sort(np.concatenate((np.linspace(ymin,ymax,401),np.array(ths22_lcm))))
+
+    tt12_lcm, tt21_lcm = np.meshgrid(tt1_lcm, tt2_lcm)
+    if loss_type == 'MSE':
+        K12_lcm = np.zeros((tt12_lcm.shape[0],tt21_lcm.shape[0]))
+        for i in range(tt12_lcm.shape[0]):
+            for j in range(tt21_lcm.shape[0]):
+                theta = np.array([tt12_lcm[i,j], tt21_lcm[i,j]])
+                K12_lcm[i,j],_= costFunction_MSE(theta, X_train_o, y_train)
+    elif loss_type == 'CE': 
+        K12_lcm = np.zeros((tt12_lcm.shape[0],tt21_lcm.shape[0]))
+        for i in range(tt12_lcm.shape[0]):
+            for j in range(tt21_lcm.shape[0]):
+                theta = np.array([tt12_lcm[i,j], tt21_lcm[i,j]])
+                K12_lcm[i,j],_= costFunction(theta, X_train_o, y_train)
+    #Surface plot
+    fig = plt.figure(figsize=(14, 6))
+    ax = fig.add_subplot(121, projection='3d')
+    ax.plot_surface(tt21_lcm, tt12_lcm, K12_lcm, cmap='viridis')
+    plt.xlabel('theta_1')
+    plt.ylabel('theta_0')
+    plt.title('Surface')
+    # contour plot
+    ax = plt.subplot(122)
+    plt.contour(tt1_lcm, tt2_lcm, K12_lcm, linewidths=2, cmap='viridis', levels = 30)
+    plt.xlabel('theta_0')
+    plt.ylabel('theta_1')
+    plt.plot(ths11_lcm, ths22_lcm, '-*')
+    plt.plot(gmin[0],gmin[1], 'ro') 
+    plt.plot(theta_mse_lcm[0], theta_mse_lcm[1], 'm*')
+    #plt.plot(theta[0], theta[1], 'ro', ms=10, lw=2)
+    plt.title('Contour, showing thetas leading to minimum')
+    plt.suptitle('MSE loss function surface and contour')
+    plt.show()
