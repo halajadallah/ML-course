@@ -434,8 +434,8 @@ def local_min_contour_plot(costFunc,X_train_o, y_train, theta_0_lcm, iterations,
     ax.plot(ths11_lcm, ths22_lcm, J_lcm_short_list, c='g', linewidth = 3)
     ax.plot(ths11_lcm_lr1, ths22_lcm_lr1, J_lcm_lr1_short_list, c='r', linewidth = 3)
     ax.view_init(30,140)
-    plt.xlabel('theta_1')
-    plt.ylabel('theta_0')
+    plt.xlabel('theta_0')
+    plt.ylabel('theta_1')
     plt.title('Surface')
     
     # contour plot
@@ -457,8 +457,8 @@ def local_min_contour_plot(costFunc,X_train_o, y_train, theta_0_lcm, iterations,
         ax.plot(ths11_lcm, ths22_lcm, grads_theta_0, c='g', linewidth = 3) 
         ax.plot(ths11_lcm_lr1, ths22_lcm_lr1, grads_lr1_theta_0, c='r', linewidth = 3)
         ax.view_init(30,140)
-        plt.xlabel('theta_1')
-        plt.ylabel('theta_0')
+        plt.xlabel('theta_0')
+        plt.ylabel('theta_1')
         plt.title('gradient with respect to theta_0')
 
         #plot gradient with respect to theta_1
@@ -467,8 +467,8 @@ def local_min_contour_plot(costFunc,X_train_o, y_train, theta_0_lcm, iterations,
         ax.plot(ths11_lcm, ths22_lcm, grads_theta_1, c='g', linewidth = 3)
         ax.plot(ths11_lcm_lr1, ths22_lcm_lr1, grads_lr1_theta_1, c='r', linewidth = 3)
         ax.view_init(30,140)
-        plt.xlabel('theta_1')
-        plt.ylabel('theta_0')
+        plt.xlabel('theta_0')
+        plt.ylabel('theta_1')
         plt.title('gradient with respect to theta_1')
     plt.suptitle('Loss function surface and contour ')
     plt.show()
